@@ -55,6 +55,11 @@ export const focusOnlyOfficeEditor = async (page: Page): Promise<void> => {
 }
 
 export const getOfficeDocumentContent = async (page: Page): Promise<string> => {
+  // Bring page to front and ensure proper focus before clipboard operations
+  // (commented out - only needed for local testing, not required in CI)
+  // await page.bringToFront()
+  // await page.waitForTimeout(200)
+
   // clear the clipboard
   await page.evaluate("navigator.clipboard.writeText('')")
   // copying and getting the value with keyboard requires some time

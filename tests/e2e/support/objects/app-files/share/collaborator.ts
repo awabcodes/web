@@ -100,16 +100,20 @@ export default class Collaborator {
   static async addCollaborator(args: CollaboratorArgs): Promise<void> {
     const {
       page,
-      collaborator: { collaborator }
+      collaborator: { collaborator, shareType }
     } = args
     const collaboratorInputLocator = page.locator(Collaborator.inviteInput)
     await collaboratorInputLocator.click()
     await Promise.all([
       page.waitForResponse((resp) => resp.url().includes('users') && resp.status() === 200),
-      // Use unique username (id) when this is a parallel-test user (has originalId).
-      // This prevents ambiguity when multiple parallel workers create users with the same displayName.
+      // For external/federated shares, use displayName - API searches by displayName.
+      // For regular shares, use id for parallel test users (has originalId) to avoid ambiguity.
       collaboratorInputLocator.fill(
-        (collaborator as User).originalId ? collaborator.id : collaborator.displayName
+        shareType === 'external'
+          ? collaborator.displayName
+          : (collaborator as User).originalId
+            ? collaborator.id
+            : collaborator.displayName
       )
     ])
     await objects.a11y.Accessibility.assertNoSevereA11yViolations(
